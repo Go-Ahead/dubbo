@@ -16,8 +16,14 @@
  */
 package com.alibaba.dubbo.demo.consumer;
 
+import Entity.Person;
 import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.demo.DemoService2;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Consumer {
 
@@ -27,18 +33,66 @@ public class Consumer {
         System.setProperty("java.net.preferIPv4Stack", "true");
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/dubbo-demo-consumer.xml"});
         context.start();
-        DemoService demoService = (DemoService) context.getBean("demoService"); // get remote service proxy
+        final DemoService demoService = (DemoService) context.getBean("demoService"); // get remote service proxy
+        final DemoService2 demoService2 = (DemoService2) context.getBean("demoService2"); // get remote service proxy
 
-        while (true) {
-            try {
-                Thread.sleep(1000);
-                String hello = demoService.sayHello("world"); // call remote method
-                System.out.println(hello); // get result
+        ExecutorService executorService = Executors.newFixedThreadPool(100);
+        ExecutorService executorService2 = Executors.newFixedThreadPool(100);
+        for (int i=0;i < 100;i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep(1000);
+                            String hello = demoService.sayHello("world"); // call remote method
+                            System.out.println(hello); // get result
+                            String hello2 = demoService.sayByeBye("china"); // call remote method
+                            System.out.println(hello2); // get result
 
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    }
+                }
+            });
         }
+
+
+        final Person person = new Person();
+        person.setName("李四");
+        person.setAge(18);
+
+        for(int i=0;i < 100;i++) {
+            executorService2.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep(1000);
+                            String name = demoService2.getName(person);
+                            System.out.printf(name);
+
+                            String print = demoService2.print(person);
+
+                            System.out.printf(print);
+
+
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+
+
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.nextLine().equals("q")) {
+            System.exit(0);
+        }
+
+
 
     }
 }
