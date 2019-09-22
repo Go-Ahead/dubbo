@@ -36,9 +36,10 @@ public class Consumer {
         final DemoService demoService = (DemoService) context.getBean("demoService"); // get remote service proxy
         final DemoService2 demoService2 = (DemoService2) context.getBean("demoService2"); // get remote service proxy
 
-        ExecutorService executorService = Executors.newFixedThreadPool(100);
-        ExecutorService executorService2 = Executors.newFixedThreadPool(100);
-        for (int i=0;i < 100;i++) {
+        int number = 1;
+        ExecutorService executorService = Executors.newFixedThreadPool(number);
+        ExecutorService executorService2 = Executors.newFixedThreadPool(number);
+        for (int i=0;i < number;i++) {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -63,7 +64,7 @@ public class Consumer {
         person.setName("李四");
         person.setAge(18);
 
-        for(int i=0;i < 100;i++) {
+        for(int i=0;i < number;i++) {
             executorService2.execute(new Runnable() {
                 @Override
                 public void run() {
